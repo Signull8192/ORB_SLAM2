@@ -125,7 +125,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     string dataDir = getenv("TRAJ_DATA_DIR");
     string outDir = dataDir + "/orb_slam/";
     string outPath = outDir + video_id;
-    outPath = outPath + "_egomotion.csv";
+    outPath = outPath + "_poses.csv";
     cout << outPath << endl;
 
     outFile.open(outPath.c_str());
