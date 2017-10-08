@@ -17,7 +17,7 @@ Camera.p2: 0.0
 Camera.k3: 0.0
 
 # Camera frames per second 
-Camera.fps: 10.0
+Camera.fps: 20.0
 
 # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
 Camera.RGB: 1
@@ -27,7 +27,7 @@ Camera.RGB: 1
 #--------------------------------------------------------------------------------------------
 
 # ORB Extractor: Number of features per image
-ORBextractor.nFeatures: 2000
+ORBextractor.nFeatures: 2500
 
 # ORB Extractor: Scale factor between levels in the scale pyramid 	
 ORBextractor.scaleFactor: 1.2
@@ -40,7 +40,7 @@ ORBextractor.nLevels: 8
 # Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
 # You can lower these values if your images have low contrast			
 ORBextractor.iniThFAST: 20
-ORBextractor.minThFAST: 8
+ORBextractor.minThFAST: 6
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters

@@ -519,7 +519,7 @@ int System::GetTrackingLost()
 {
     int state = GetTrackingState();
     return (state == 3) && (mpTracker->mCurrentFrame.mnId >=
-        mpTracker->mnLastRelocFrameId + 2);
+        mpTracker->mnLastRelocFrameId + 5);
 }
 
 } //namespace ORB_SLAM
