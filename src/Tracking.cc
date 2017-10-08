@@ -49,7 +49,7 @@ namespace ORB_SLAM2
 Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor):
     mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false), mbVO(false), mpORBVocabulary(pVoc),
     mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys), mpViewer(NULL),
-    mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpMap(pMap), mnLastRelocFrameId(0)
+    mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpMap(pMap), mnLastRelocFrameId(0), mnLostTrackId(0)
 {
     // Load camera parameters from settings file
 
@@ -414,9 +414,15 @@ void Tracking::Track()
         }
 
         if(bOK)
+        {
             mState = OK;
+        }
         else
+        {
             mState=LOST;
+            if (mLastProcessedState == OK)
+                mnLostTrackId = mCurrentFrame.mnId;
+        }
 
         // Update drawer
         mpFrameDrawer->Update(this);
@@ -923,7 +929,7 @@ bool Tracking::TrackWithMotionModel()
             else if(mCurrentFrame.mvpMapPoints[i]->Observations()>0)
                 nmatchesMap++;
         }
-    }    
+    }
 
     if(mbOnlyTracking)
     {
@@ -1456,17 +1462,20 @@ bool Tracking::Relocalization()
                         mCurrentFrame.mvpMapPoints[io]=static_cast<MapPoint*>(NULL);
 
                 // If few inliers, search by projection in a coarse window and optimize again
+                //if(nGood<50)
                 if(nGood<50)
                 {
                     int nadditional =matcher2.SearchByProjection(mCurrentFrame,vpCandidateKFs[i],sFound,10,100);
 
-                    if(nadditional+nGood>=50)
+                    //if(nadditional+nGood>=50)
+                    if(nadditional+nGood>=25)
                     {
                         nGood = Optimizer::PoseOptimization(&mCurrentFrame);
 
                         // If many inliers but still not enough, search by projection again in a narrower window
                         // the camera has been already optimized with many points
-                        if(nGood>30 && nGood<50)
+                        //if(nGood>30 && nGood<50)
+                        if(nGood>15 && nGood<25)
                         {
                             sFound.clear();
                             for(int ip =0; ip<mCurrentFrame.N; ip++)
@@ -1475,7 +1484,8 @@ bool Tracking::Relocalization()
                             nadditional =matcher2.SearchByProjection(mCurrentFrame,vpCandidateKFs[i],sFound,3,64);
 
                             // Final optimization
-                            if(nGood+nadditional>=50)
+                            //if(nGood+nadditional>=50)
+                            if(nGood+nadditional>=25)
                             {
                                 nGood = Optimizer::PoseOptimization(&mCurrentFrame);
 
@@ -1489,7 +1499,8 @@ bool Tracking::Relocalization()
 
 
                 // If the pose is supported by enough inliers stop ransacs and continue
-                if(nGood>=50)
+                // if(nGood>=50)
+                if(nGood>=25)
                 {
                     bMatch = true;
                     break;

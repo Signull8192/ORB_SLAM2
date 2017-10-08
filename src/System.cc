@@ -518,8 +518,9 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 int System::GetTrackingLost()
 {
     int state = GetTrackingState();
+    //cout << mpTracker->mCurrentFrame.mnId << "," << mpTracker->mnLostTrackId << endl;
     return (state == 3) && (mpTracker->mCurrentFrame.mnId >=
-        mpTracker->mnLastRelocFrameId + 5);
+        mpTracker->mnLostTrackId + 5);
 }
 
 } //namespace ORB_SLAM

@@ -4,7 +4,7 @@
 # Camera Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
 
-# Camera calibration and distortion parameters (OpenCV) 
+# Camera calibration and distortion parameters (OpenCV)
 Camera.fx: 482.38765808
 Camera.fy: 482.38765808
 Camera.cx: 640.0
@@ -16,7 +16,7 @@ Camera.p1: 0.0
 Camera.p2: 0.0
 Camera.k3: 0.0
 
-# Camera frames per second 
+# Camera frames per second
 Camera.fps: 20.0
 
 # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
@@ -27,19 +27,19 @@ Camera.RGB: 1
 #--------------------------------------------------------------------------------------------
 
 # ORB Extractor: Number of features per image
-ORBextractor.nFeatures: 2500
+ORBextractor.nFeatures: 3000
 
-# ORB Extractor: Scale factor between levels in the scale pyramid 	
+# ORB Extractor: Scale factor between levels in the scale pyramid
 ORBextractor.scaleFactor: 1.2
 
-# ORB Extractor: Number of levels in the scale pyramid	
+# ORB Extractor: Number of levels in the scale pyramid
 ORBextractor.nLevels: 8
 
 # ORB Extractor: Fast threshold
 # Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
 # Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
-# You can lower these values if your images have low contrast			
-ORBextractor.iniThFAST: 20
+# You can lower these values if your images have low contrast
+ORBextractor.iniThFAST: 18
 ORBextractor.minThFAST: 6
 
 #--------------------------------------------------------------------------------------------

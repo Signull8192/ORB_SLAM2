@@ -115,7 +115,7 @@ public:
 
     void Reset();
 
-    unsigned int mnLastRelocFrameId;
+    unsigned int mnLostTrackId;
 
 protected:
 
@@ -207,6 +207,7 @@ protected:
     KeyFrame* mpLastKeyFrame;
     Frame mLastFrame;
     unsigned int mnLastKeyFrameId;
+    unsigned int mnLastRelocFrameId;
 
     //Motion Model
     cv::Mat mVelocity;
