@@ -202,9 +202,9 @@ private:
     void AssignFeaturesToGrid();
 
     // Rotation, translation and camera center
-    cv::Mat mRcw;
-    cv::Mat mtcw;
-    cv::Mat mRwc;
+    cv::Mat mRcw;  // Orientation: Camera
+    cv::Mat mtcw;  // Translation: Camera
+    cv::Mat mRwc;  //
     cv::Mat mOw; //==mtwc
 };
 

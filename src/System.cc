@@ -19,18 +19,22 @@
 */
 
 
-
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "System.h"
 #include "Converter.h"
 #include <thread>
 #include <pangolin/pangolin.h>
 #include <iomanip>
 
+using namespace std;
+
 namespace ORB_SLAM2
 {
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
-               const bool bUseViewer):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false),mbActivateLocalizationMode(false),
+               const bool bUseViewer, const string &video_id):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false),mbActivateLocalizationMode(false),
         mbDeactivateLocalizationMode(false)
 {
     // Output welcome message
@@ -111,6 +115,20 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     mpLoopCloser->SetTracker(mpTracker);
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
+
+    // Initialize output file
+    //string::size_type pos = imDir.find_last_of('/') + 1;
+    //string::size_type pos2 = imDir.substr(0, pos - 1).find_last_of('/') + 1;
+    //string video_id = (pos == std::string::npos) ? std::string() : imDir.substr(pos2, pos);
+    cout << video_id << endl;
+    string dataDir = getenv("TRAJ_DATA_DIR");
+    string outDir = dataDir + "/orb_slam/";
+    string outPath = outDir + video_id;
+    outPath = outPath + "_egomotion.csv";
+    cout << outPath << endl;
+
+    outFile.open(outPath.c_str());
+
 }
 
 cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp)
@@ -119,7 +137,7 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
     {
         cerr << "ERROR: you called TrackStereo but input sensor was not set to STEREO." << endl;
         exit(-1);
-    }   
+    }
 
     // Check mode change
     {
@@ -170,7 +188,7 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
     {
         cerr << "ERROR: you called TrackRGBD but input sensor was not set to RGBD." << endl;
         exit(-1);
-    }    
+    }
 
     // Check mode change
     {
@@ -215,7 +233,7 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
     return Tcw;
 }
 
-cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
+cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp, const string &key)
 {
     if(mSensor!=MONOCULAR)
     {
@@ -264,6 +282,13 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
     mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
 
+    // Printf
+    string::size_type pos = key.find_last_of('/') + 1;
+    cout << key.substr(pos).c_str() << "," << cv::format(mpTracker->mCurrentFrame.mTcw.reshape(1), cv::Formatter::FMT_CSV);
+    outFile << key.substr(pos).c_str() << "," << cv::format(mpTracker->mCurrentFrame.mTcw.reshape(1), cv::Formatter::FMT_CSV);
+    if(mpTracker->mCurrentFrame.mTcw.total() == 0)
+        outFile << endl;
+
     return Tcw;
 }
 
@@ -300,6 +325,7 @@ void System::Reset()
 
 void System::Shutdown()
 {
+    outFile.close();
     mpLocalMapper->RequestFinish();
     mpLoopCloser->RequestFinish();
     if(mpViewer)
@@ -487,6 +513,13 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 {
     unique_lock<mutex> lock(mMutexState);
     return mTrackedKeyPointsUn;
+}
+
+int System::GetTrackingLost()
+{
+    int state = GetTrackingState();
+    return (state == 3) && (mpTracker->mCurrentFrame.mnId >=
+        mpTracker->mnLastRelocFrameId + 2);
 }
 
 } //namespace ORB_SLAM

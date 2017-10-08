@@ -21,6 +21,9 @@
 
 #include "Tracking.h"
 
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
 
@@ -395,6 +398,7 @@ void Tracking::Track()
         mCurrentFrame.mpReferenceKF = mpReferenceKF;
 
         // If we have an initial estimation of the camera pose and matching. Track the local map.
+        // 判定部
         if(!mbOnlyTracking)
         {
             if(bOK)
@@ -872,11 +876,13 @@ bool Tracking::TrackWithMotionModel()
     // Create "visual odometry" points if in Localization Mode
     UpdateLastFrame();
 
+    // ここがLinear model?
     mCurrentFrame.SetPose(mVelocity*mLastFrame.mTcw);
 
     fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL));
 
     // Project points seen in previous frame
+    // Projectionに使う特徴点を探索
     int th;
     if(mSensor!=System::STEREO)
         th=15;
@@ -895,6 +901,7 @@ bool Tracking::TrackWithMotionModel()
         return false;
 
     // Optimize frame pose with all matches
+    // 最適化本体
     Optimizer::PoseOptimization(&mCurrentFrame);
 
     // Discard outliers
@@ -964,10 +971,11 @@ bool Tracking::TrackLocalMap()
 
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
-    if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50)
+    // ここのしきい値を変える 50->25, 30->10
+    if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<25)
         return false;
 
-    if(mnMatchesInliers<30)
+    if(mnMatchesInliers<10)
         return false;
     else
         return true;
@@ -1340,6 +1348,7 @@ void Tracking::UpdateLocalKeyFrames()
 
 bool Tracking::Relocalization()
 {
+
     // Compute Bag of Words Vector
     mCurrentFrame.ComputeBoW();
 
