@@ -27,6 +27,7 @@
 #include <thread>
 #include <pangolin/pangolin.h>
 #include <iomanip>
+#include <boost/lexical_cast.hpp>
 
 using namespace std;
 
@@ -283,11 +284,19 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp, const
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
 
     // Printf
+    cv::Mat mTcw = mpTracker->mCurrentFrame.mTcw;
     string::size_type pos = key.find_last_of('/') + 1;
-    cout << key.substr(pos).c_str() << "," << cv::format(mpTracker->mCurrentFrame.mTcw.reshape(1), cv::Formatter::FMT_CSV);
-    outFile << key.substr(pos).c_str() << "," << cv::format(mpTracker->mCurrentFrame.mTcw.reshape(1), cv::Formatter::FMT_CSV);
-    if(mpTracker->mCurrentFrame.mTcw.total() == 0)
-        outFile << endl;
+    string outStr = key.substr(pos).c_str();
+
+    if (mTcw.rows == 4 && mTcw.cols == 4){
+        for (int i = 0; i < 4;i++){
+            for (int j = 0;j < 4;j++){
+                outStr = outStr + "," + boost::lexical_cast<std::string>(mTcw.at<float>(i, j));
+            }
+        }
+    }
+    cout << outStr << endl;
+    outFile << outStr << endl;
 
     return Tcw;
 }
@@ -520,7 +529,7 @@ int System::GetTrackingLost()
     int state = GetTrackingState();
     //cout << mpTracker->mCurrentFrame.mnId << "," << mpTracker->mnLostTrackId << endl;
     return (state == 3) && (mpTracker->mCurrentFrame.mnId >=
-        mpTracker->mnLostTrackId + 5);
+        mpTracker->mnLostTrackId + 2);
 }
 
 } //namespace ORB_SLAM

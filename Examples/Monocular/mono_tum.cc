@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
     // Main loop
     cv::Mat im;
-    for(int ni=0; ni<nImages; ni++)
+    for(int ni=1000; ni<nImages; ni++)
     {
         // Read image from file
         im = cv::imread(imgDir + "/" + vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
@@ -98,8 +98,10 @@ int main(int argc, char **argv)
         vTimesTrack[ni]=ttrack;
 
         if (SLAM.GetTrackingLost()){
-            cout << "Tracker lost: terminating..." << endl;
-            break;
+            SLAM.Reset();
+            cout << "Tracker lost: reset..." << endl;
+            //cout << "Tracker lost: terminating..." << endl;
+            //break;
         }
 
         // Wait to load the next frame

@@ -1500,7 +1500,7 @@ bool Tracking::Relocalization()
 
                 // If the pose is supported by enough inliers stop ransacs and continue
                 // if(nGood>=50)
-                if(nGood>=25)
+                if(nGood>=20)
                 {
                     bMatch = true;
                     break;
